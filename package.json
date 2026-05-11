@@ -1,0 +1,24 @@
+{
+  "name": "trading-journal-app",
+  "version": "1.0.0",
+  "description": "",
+  "main": "sever.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/jasonanagho1/trading-journal-app.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "bugs": {
+    "url": "https://github.com/jasonanagho1/trading-journal-app/issues"
+  },
+  "homepage": "https://github.com/jasonanagho1/trading-journal-app#readme",
+  "dependencies": {
+    "express": "^5.2.1"
+  }
+}
