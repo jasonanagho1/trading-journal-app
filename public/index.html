@@ -1,0 +1,336 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Trading Journal</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+
+  <div class="container">
+
+    <header class="app-header">
+      <h1>Trading Journal</h1>
+      <p>Track and review your trades</p>
+    </header>
+
+
+    <div class="tabs">
+      <button class="tab-btn active" data-tab="dashboard">Dashboard</button>
+      <button class="tab-btn" data-tab="trades">Trades</button>
+      <button class="tab-btn" data-tab="analytics">Analytics</button>
+      <button class="tab-btn" data-tab="review">Review</button>
+      <button class="tab-btn" data-tab="goals">Goals</button>
+    </div>
+
+    <div id="dashboardTab" class="tab-content">
+
+      <div id="stats" class="stats-container">
+        <div class="stat-card">
+          <h3>Total Trades</h3>
+          <p id="totalTrades">0</p>
+        </div>
+
+        <div class="stat-card">
+          <h3>Total Profit/Loss</h3>
+          <p>$<span id="totalProfitLoss">0</span></p>
+        </div>
+
+        <div class="stat-card">
+          <h3>Wins</h3>
+          <p id="wins">0</p>
+        </div>
+
+        <div class="stat-card">
+          <h3>Losses</h3>
+          <p id="losses">0</p>
+        </div>
+
+        <div class="stat-card">
+          <h3>Win Rate</h3>
+          <p><span id="winRate">0</span>%</p>
+        </div>
+      </div>
+
+      <button id="exportCsvBtn">Export to CSV</button>
+
+      <div class="dashboard-details">
+        <p>Average Trade: $<span id="averageTrade">0</span></p>
+        <p>Best Trade: $<span id="bestTrade">0</span></p>
+        <p>Worst Trade: $<span id="worstTrade">0</span></p>
+        <p>Average Winner: $<span id="averageWinner">0</span></p>
+        <p>Average Loser: $<span id="averageLoser">0</span></p>
+        <p>Biggest Win Streak: <span id="biggestWinStreak">0</span></p>
+        <p>Biggest Loss Streak: <span id="biggestLossStreak">0</span></p>
+        <p>Profit Factor: <span id="profitFactor">0</span></p>
+      </div>
+
+      <div class="dashboard-details">
+        <p>Average RR: $<span id="averageR">0</span></p>
+        <p>Average Win RR: $<span id="averageWinR">0</span></p>
+        <p>Highest RR Trade: $<span id="bestR">0</span></p>
+      </div>
+
+      <div class="chart-container">
+        <h2>Trading Equity Curve</h2>
+        <canvas id="equityChart"></canvas>
+      </div>
+    </div>
+
+    </div>
+
+    <div id="tradesTab" class="tab-content hidden">
+
+      <div class="filter-buttons">
+        <button class="active-filter" onclick="filterTrades('all'); setActiveButton(this, '.filter-buttons button');">All</button>
+        <button onclick="filterTrades('wins'); setActiveButton(this, '.filter-buttons button');">Wins</button>
+        <button onclick="filterTrades('losses'); setActiveButton(this, '.filter-buttons button');">Losses</button>
+      </div>
+
+      <div class="sort-buttons">
+          <button class="active-filter" onclick="sortTrades('newest'); setActiveButton(this, '.sort-buttons button');">Newest</button>
+          <button onclick="sortTrades('oldest'); setActiveButton(this, '.sort-buttons button');">Oldest</button>
+          <button onclick="sortTrades('highest'); setActiveButton(this, '.sort-buttons button');">Highest Profit</button>
+          <button onclick="sortTrades('lowest'); setActiveButton(this, '.sort-buttons button');">Biggest Loss</button>
+      </div>
+
+      <div class="filter-section">
+          <button id="allDirectionBtn" class="active-filter">All Directions</button>
+          <button id="buyDirectionBtn">Buy</button>
+          <button id="sellDirectionBtn">Sell</button>
+      </div>
+      <h4>Filter by Tag</h4>
+      <select id="tagFilter">
+        <option value="all">All Tags</option>
+        <option value="A+ Setup">A+ Setup</option>
+        <option value="Revenge Trade">Revenge Trade</option>
+        <option value="News Trade">News Trade</option>
+        <option value="Bad Entry">Bad Entry</option>
+        <option value="Good Discipline">Good Discipline</option>
+      </select>
+
+      <h4>Filter by Date</h4>
+      <input type="date" id="startDate">
+      <input type="date" id="endDate">
+
+      <h4>Profit Range</h4>
+      <input type="number" id="minProfit" placeholder="Min Profit">
+      <input type="number" id="maxProfit" placeholder="Max Profit">
+
+      <h4>Search Trades</h4>
+      <div class="search-container">
+        <input
+          type="text"
+          id="searchInput"
+          placeholder="Search pair..."
+          oninput="searchTrades()"
+        >
+      </div>
+
+      <h3>Add New Trade</h3>
+
+      <form id="tradeForm">
+        <input type="text" id="pair" placeholder="Pair ex: NAS100" required>
+        <input type="text" id="direction" placeholder="Buy or Sell" required>
+        <input type="number" id="profitLoss" placeholder="Profit/Loss" required>
+        <input type="number" id="risk" placeholder="Risk ($)" required>
+
+        <textarea id="notes" placeholder="Trade notes"></textarea>
+
+        <div class="tag-group">
+          <label>
+            <input type="checkbox" name="tags" value="A+ Setup">
+            A+ Setup
+          </label>
+
+          <label>
+            <input type="checkbox" name="tags" value="Revenge Trade">
+            Revenge Trade
+          </label>
+
+          <label>
+            <input type="checkbox" name="tags" value="News Trade">
+            News Trade
+          </label>
+
+          <label>
+            <input type="checkbox" name="tags" value="Bad Entry">
+            Bad Entry
+          </label>
+
+          <label>
+            <input type="checkbox" name="tags" value="Good Discipline">
+            Good Discipline
+          </label>
+        </div>
+
+        <input type="file" id="screenshot" accept="image/*">
+
+        <div class="remove-screenshot">
+          <input type="checkbox" id="removeScreenshot">
+          <label for="removeScreenshot">Remove Screenshot</label>
+        </div>
+
+        <button type="submit">Add Trade</button>
+      </form>
+
+      <h2>Trades</h2>
+
+      <p id="emptyMessage">No trades to display.</p>
+
+      <div id="trades"></div>
+
+    </div>
+
+    <div id="analyticsTab" class="tab-content hidden">
+      
+      <div class="calendar-layout">
+
+        <div class="calendar-section">
+        
+        <div class="calendar-box">
+        <h2>P&L Calendar</h2>
+        <div class="calendar-header">
+          <button id="prevMonth">&lt;</button>
+          <h3 id="calendarTitle"></h3>
+          <button id="nextMonth">&gt;</button>
+        </div>
+          <div class="calendar-weekdays">
+            <div>Sun</div>
+            <div>Mon</div>
+            <div>Tue</div>
+            <div>Wed</div>
+            <div>Thu</div>
+            <div>Fri</div>
+            <div>Sat</div>
+          </div>
+          <div id="calendar"></div>
+        </div>
+
+      </div>
+
+      <div id="weeklySummary"></div>
+
+      </div>
+      
+      
+      <div class="analytics-grid">
+
+
+        <div class="analytics-box">
+          
+
+
+          <h2>Day of Week statistics</h2>
+
+          <p>Monday: <span id="mondayStats">0 Trades | $0</span></p>
+          <p>Tuesday: <span id="tuesdayStats">0 Trades | $0</span></p>
+          <p>Wednesday: <span id="wednesdayStats">0 Trades | $0</span></p>
+          <p>Thursday: <span id="thursdayStats">0 Trades | $0</span></p>
+          <p>Friday: <span id="fridayStats">0 Trades | $0</span></p>
+          <p>Saturday: <span id="saturdayStats">0 Trades | $0</span></p>
+          <p>Sunday: <span id="sundayStats">0 Trades | $0</span></p>
+          <p><strong>Best Weekday:</strong> <span id="bestWeekday">None</span></p>
+          <p><strong>Worst Weekday:</strong> <span id="worstWeekday">None</span></p>
+        </div>
+
+      </div>
+      
+      <div id="setupStats" class="stats-box">
+        <h2>Setup statistics</h2>
+
+        <p>A+ Setup: <span id="aPlusStats">0 Trades | $0</span></p>
+        <p>Revenge Trade: <span id="revengeStats">0 Trades | $0</span></p>
+        <p>News Trade: <span id="newsStats">0 Trades | $0</span></p>
+        <p>Bad Entry: <span id="badEntryStats">0 Trades | $0</span></p>
+        <p>Good Discipline: <span id="disciplineStats">0 Trades | $0</span></p>
+      </div>
+
+      <div class="tag-comparison-section">
+        <h2>Tag Comparison</h2>
+
+        <select id="comparisonTag">
+          <option value="A+ Setup">A+ Setup</option>
+          <option value="Revenge Trade">Revenge Trade</option>
+          <option value="News Trade">News Trade</option>
+          <option value="Bad Entry">Bad Entry</option>
+          <option value="Good Discipline">Good Discipline</option>
+        </select>
+
+        <p id="withTagStats">With Tag: 0 Trades | $0 | 0% WR | 0R Avg</p>
+        <p id="withoutTagStats">Without Tag: 0 Trades | $0 | 0% WR | 0R Avg</p>
+      </div>
+
+      <div class="analytics-box">
+        <h2>Performance By Pair</h2>
+        <div id="pairStats"></div>
+      </div>
+
+      <div class="analytics-box">
+        <h2>Direction Performance</h2>
+        <div id="directionStats"></div>
+      </div>
+
+      <div class="analytics-box">
+        <h2>Most Traded Pair</h2>
+        <div id="mostTradedPair"></div>
+      </div>
+
+      <div class="analytics-box">
+        <h2>Monthly Performance</h2>
+        <div id="monthlyStats"></div>
+      </div>
+
+    </div>
+
+    <div id="reviewTab" class="tab-content hidden">
+      <h2>Review</h2>
+      <div class="review-form">
+        <label>What went well?</label>
+        <textarea id="reviewGood"></textarea>
+
+        <label>What went wrong?</label>
+        <textarea id="reviewBad"></textarea>
+
+        <label>Emotional state</label>
+        <textarea id="reviewEmotion"></textarea>
+
+        <label>Lesson learned</label>
+        <textarea id="reviewLesson"></textarea>
+
+        <button id="saveReviewBtn">Save Review</button>
+
+        
+      </div>
+
+      <p id="emptyReviewMessage">No reviews yet. Save your first trading review.</p>
+
+      <div id="reviewHistory"></div>
+    </div>
+
+    <div id="goalsTab" class="tab-content hidden">
+      <h2>Trading Goals</h2>
+
+      <input type="text" id="goalTitle" placeholder="Goal Title">
+
+      <input type="number" id="goalTarget" placeholder="Target">
+
+      <input type="number" id="goalCurrent" placeholder="Current Progress">
+
+      <input type="date" id="goalDeadline">
+
+      <button onclick="addGoal()">Save Goal</button>
+
+      <p id="emptyGoalMessage" class="hidden">No goals yet. Save your first trading goal.</p>
+
+      <div id="goalHistory"></div>
+    </div>
+
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script src="script.js"></script>
+
+</body>
+</html>
+
