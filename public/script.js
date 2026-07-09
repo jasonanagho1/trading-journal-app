@@ -1,5 +1,5 @@
 let equityChart = null;
-let trades = [];
+let trades = JSON.parse(localStorage.getItem("trades")) || [];
 let editingTradeId = null;
 let currentDirectionFilter = "all";
 let currentTagFilter = "all";
@@ -7,10 +7,16 @@ let currentStartDate = "";
 let currentEndDate = "";
 let currentMinProfit = "";
 let currentMaxProfit = "";
+let currentMonth = new Date().getMonth();
+let currentYear = new Date().getFullYear();
 const form = document.getElementById("tradeForm");
 const tradesDiv = document.getElementById("trades");
 const tagCheckboxes = document.querySelectorAll('input[name="tags"]');
 const exportCsvBtn = document.getElementById("exportCsvBtn");
+
+function saveTrades() {
+    localStorage.setItem("trades", JSON.stringify(trades));
+}
 
 function displayTrade(trade) {
 
@@ -106,9 +112,8 @@ function displayTrades(tradesToDisplay) {
     checkEmptyMessage(tradesToDisplay);
 }
 
-async function loadTrades() {
-    const response = await fetch("/trades");
-    trades = await response.json();
+function loadTrades() {
+    trades = JSON.parse(localStorage.getItem("trades")) || [];
     trades.sort(function(a, b) {
         return b.id - a.id;
     });
@@ -169,67 +174,74 @@ async function loadTrades() {
     renderCalendar(trades);
 }
 
-form.addEventListener("submit", async function(event) {
+form.addEventListener("submit", function(event) {
     event.preventDefault();
 
     const pair = document.getElementById("pair").value;
     const direction = document.getElementById("direction").value;
     const profitLoss = document.getElementById("profitLoss").value;
+    const risk = document.getElementById("risk").value;
     const notes = document.getElementById("notes").value;
+    const date = new Date().toISOString();
 
     const selectedTags = [];
 
-    tagCheckboxes.forEach((checkbox) => {
+    tagCheckboxes.forEach(function(checkbox) {
         if (checkbox.checked) {
-        selectedTags.push(checkbox.value);
+            selectedTags.push(checkbox.value);
         }
     });
 
-    const formData = new FormData();
-    formData.append("pair", pair);
-    formData.append("direction", direction);
-    formData.append("profitLoss", profitLoss);
-    formData.append("risk", document.getElementById("risk").value);
-    formData.append("notes", notes);
-    formData.append("tags", JSON.stringify(selectedTags));
+    if (editingTradeId === null) {
+        const newTrade = {
+            id: Date.now(),
+            date: date,
+            pair: pair,
+            direction: direction,
+            profitLoss: Number(profitLoss),
+            risk: Number(risk),
+            notes: notes,
+            tags: selectedTags,
+            screenshot: ""
+        };
 
-    const screenshotFile = document.getElementById("screenshot").files[0];
-    if (screenshotFile) {
-        formData.append("screenshot", screenshotFile);
-    }
-
-    const removeScreenshot = document.getElementById("removeScreenshot").checked;
-    formData.append("removeScreenshot", removeScreenshot);
-
-
-   if (editingTradeId === null) {
-    await fetch("/trades", {
-    method: "POST",
-    body: formData
-    });
+        trades.push(newTrade);
     } else {
-    await fetch(`/trades/${editingTradeId}`, {
-    method: "PUT",
-    body: formData
-    });
+        const tradeIndex = trades.findIndex(function(trade) {
+            return trade.id === editingTradeId;
+        });
+
+        if (tradeIndex !== -1) {
+            trades[tradeIndex] = {
+                ...trades[tradeIndex],
+                pair: pair,
+                direction: direction,
+                profitLoss: Number(profitLoss),
+                risk: Number(risk),
+                notes: notes,
+                tags: selectedTags,
+                screenshot: trades[tradeIndex].screenshot || ""
+            };
+        }
+
+        editingTradeId = null;
     }
 
-    editingTradeId = null;
+    saveTrades();
     form.reset();
     loadTrades();
-
-
 });
 
 
 
-async function deleteTrade(id) {
-
-    await fetch(`/trades/${id}`, {
-        method: "DELETE"
+function deleteTrade(id) {
+    trades = trades.filter(function(trade) {
+        return trade.id !== id;
     });
 
+    saveTrades();
     loadTrades();
+    
 }
 
 function editTrade(id) {
@@ -1051,9 +1063,6 @@ function getWeeklyPL(trades){
     });
     return weeklyPL;
 }
-
-let currentMonth = new Date().getMonth();
-let currentYear = new Date().getFullYear();
 
 function renderCalendar(trades){
     const calendar = document.getElementById("calendar");
