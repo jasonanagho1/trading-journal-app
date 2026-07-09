@@ -56,8 +56,6 @@ function displayTrade(trade) {
                 <p><strong>Notes:</strong> ${trade.notes}</p>
                 <p><strong>Tags:</strong> ${trade.tags && trade.tags.length > 0 ? trade.tags.join(", ") : "None"}</p>
 
-                ${trade.screenshot ? `<img src="${trade.screenshot}" alt="Screenshot" 
-                class="screenshot">` : ""}
             </div>
 
 
@@ -202,7 +200,6 @@ form.addEventListener("submit", function(event) {
             risk: Number(risk),
             notes: notes,
             tags: selectedTags,
-            screenshot: ""
         };
 
         trades.push(newTrade);
@@ -220,7 +217,6 @@ form.addEventListener("submit", function(event) {
                 risk: Number(risk),
                 notes: notes,
                 tags: selectedTags,
-                screenshot: trades[tradeIndex].screenshot || ""
             };
         }
 
