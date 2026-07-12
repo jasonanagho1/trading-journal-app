@@ -739,11 +739,13 @@ function updateEquityChart() {
 
   let runningTotal = 0;
 
-  const labels = trades.map((trade, index) => {
+  const chartTrades = [...trades].reverse();
+
+  const labels = chartTrades.map((trade, index) => {
     return `Trade ${index + 1}`;
   });
 
-  const equityData = trades.map((trade) => {
+  const equityData = chartTrades.map((trade) => {
     runningTotal += Number(trade.profitLoss);
     return runningTotal;
   });
